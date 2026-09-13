@@ -1,0 +1,88 @@
+.scrubber {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 1.5);
+  width: 100%;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--edge) * 1.5);
+}
+
+.hint {
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+}
+
+.trackWrap {
+  position: relative;
+  height: calc(var(--edge) * 2.5);
+  display: flex;
+  align-items: center;
+}
+
+/* Тесьма гириха вместо стандартной полосы ползунка. */
+.track {
+  position: absolute;
+  inset-inline: 0;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.filled {
+  height: 100%;
+  background: var(--lapis);
+}
+
+/* Узел-декагон — ручка. */
+.node {
+  position: absolute;
+  top: 50%;
+  width: calc(var(--edge) * 1.5);
+  height: calc(var(--edge) * 1.5);
+  background: var(--lapis);
+  transform: translate(-50%, -50%);
+  clip-path: polygon(50% 0, 90% 20%, 100% 60%, 75% 95%, 25% 95%, 10% 20%, 0 60%);
+  transition: transform var(--t-instant) var(--ease);
+}
+
+.input {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.input::-webkit-slider-thumb {
+  appearance: none;
+  width: calc(var(--edge) * 3);
+  height: calc(var(--edge) * 3);
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.input::-moz-range-thumb {
+  width: calc(var(--edge) * 3);
+  height: calc(var(--edge) * 3);
+  background: transparent;
+  border: 0;
+  cursor: ew-resize;
+}
+
+.input:focus-visible + .ends,
+.input:focus-visible ~ .track .node {
+  outline: none;
+}
+
+.ends {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+}

@@ -1,0 +1,140 @@
+/* ============================================================================
+   ORBIT — примитивы гириха.
+   Пять плиток гириха → пять примитивов. См. docs/BRANDBOOK.md §1 и §6.
+   Литералов цвета и размера здесь нет — только токены из tokens.css.
+   ============================================================================ */
+
+/* ---- Tile (пентагон): контейнер данных -------------------------------------
+   Без теней: глазурованная плитка не отбрасывает тень, она лежит в плоскости.
+   Глубина создаётся тоном, а не тенью. */
+.o-tile {
+  background: var(--ground-raised);
+  border: 1px solid var(--line);
+  padding: calc(var(--edge) * 3);
+  clip-path: polygon(
+    var(--chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0 100%,
+    0 var(--chamfer)
+  );
+  transition: border-color var(--t-quick) var(--ease);
+}
+
+.o-tile[data-interactive="true"]:hover {
+  border-color: var(--line-strong);
+}
+
+/* ---- Strap (бабочка): тесьма, разделитель и связь -------------------------- */
+.o-strap {
+  position: relative;
+  height: 1px;
+  background: var(--line);
+  border: 0;
+  margin: 0;
+}
+
+.o-strap::before,
+.o-strap::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  width: 5px;
+  height: 5px;
+  background: var(--line-strong);
+  transform: rotate(45deg);
+}
+
+.o-strap::before {
+  left: 0;
+}
+
+.o-strap::after {
+  right: 0;
+}
+
+/* ---- Node (декагон): отметка, чекбокс, точка данных ------------------------ */
+.o-node {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: calc(var(--edge) * 1.25);
+  height: calc(var(--edge) * 1.25);
+  background: currentColor;
+  clip-path: polygon(50% 0, 90% 20%, 100% 60%, 75% 95%, 25% 95%, 10% 20%, 0 60%);
+}
+
+.o-node[data-state="empty"] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+/* ---- Bar (шестиугольник): прогресс ----------------------------------------- */
+.o-bar {
+  position: relative;
+  height: var(--edge);
+  width: 100%;
+  background: var(--ground-sunken);
+  overflow: hidden;
+  clip-path: polygon(
+    var(--chamfer-sm) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer-sm)),
+    calc(100% - var(--chamfer-sm)) 100%,
+    0 100%,
+    0 var(--chamfer-sm)
+  );
+}
+
+.o-bar__fill {
+  height: 100%;
+  background: var(--turquoise);
+  transition: width var(--t-base) var(--ease);
+}
+
+/* ---- Mark (ромб): метка дедлайна и состояния -------------------------------
+   Форма не меняется — меняется только заливка. Срочность читается цветом
+   И положением в списке, никогда одним цветом. */
+.o-mark {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: var(--edge);
+  height: var(--edge);
+  background: currentColor;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+/* ---- Numeral: деньги и показатели ------------------------------------------
+   Колонка сумм, в которой цифры пляшут, — дефект. */
+.o-numeral {
+  font-family: var(--font-display, "Unbounded", sans-serif);
+  font-variant-numeric: tabular-nums slashed-zero;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+.o-numeral[data-direction="in"] {
+  color: var(--turquoise);
+}
+
+.o-numeral[data-direction="out"] {
+  color: var(--pomegranate);
+}
+
+.o-numeral__currency {
+  font-size: 0.36em;
+  font-weight: 500;
+  color: var(--ink-muted);
+  margin-left: 0.3em;
+  letter-spacing: 0.04em;
+}
+
+/* ---- Label: подписи и метки осей -------------------------------------------- */
+.o-label {
+  font-size: var(--text-label, 10px);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  line-height: 1.2;
+}

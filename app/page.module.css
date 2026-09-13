@@ -1,0 +1,220 @@
+/* ПУЛЬС — дневная поверхность. Первый экран по direction contract (seed 309a2252). */
+
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-inline: calc(var(--edge) * 2.5);
+  padding-block: 0 calc(var(--edge) * 12);
+}
+
+/* ---- Верхняя тесьма: знак слева, дата и скраббер по центру, ввод справа ---- */
+.topStrap {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--edge) * 2);
+  flex-wrap: wrap;
+  padding-block: calc(var(--edge) * 3);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--edge) * 1.5);
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-caption);
+  letter-spacing: 0.2em;
+}
+
+.date {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+  margin-left: auto;
+}
+
+.quickEntry {
+  font-family: var(--font-text);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--lapis-fill);
+  border: 0;
+  height: calc(var(--edge) * 5);
+  padding-inline: calc(var(--edge) * 2.5);
+  cursor: pointer;
+  clip-path: polygon(
+    var(--chamfer-sm) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer-sm)),
+    calc(100% - var(--chamfer-sm)) 100%,
+    0 100%,
+    0 var(--chamfer-sm)
+  );
+  transition: filter var(--t-instant) var(--ease);
+}
+
+.quickEntry:hover {
+  filter: brightness(1.12);
+}
+
+/* ---- Денежная строка: самый крупный масштаб на странице ---- */
+.moneyLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: calc(var(--edge) * 6);
+  padding-block: calc(var(--edge) * 7) calc(var(--edge) * 5);
+}
+
+.moneyPrimary {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 1);
+}
+
+.balance {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(38px, 8vw, 68px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums slashed-zero;
+  letter-spacing: -0.025em;
+}
+
+.balanceAlt {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+}
+
+.moneySecondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--edge) * 4);
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 0.5);
+}
+
+.cellValue {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-subtitle);
+  font-variant-numeric: tabular-nums;
+}
+
+.in {
+  color: var(--turquoise);
+}
+
+.out {
+  color: var(--pomegranate);
+}
+
+.attention {
+  color: var(--ochre);
+}
+
+/* ---- Три плитки на сетке гириха ---- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: calc(var(--edge) * 2);
+  margin-top: calc(var(--edge) * 3);
+}
+
+.tileHead {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--edge) * 1.25);
+  margin-bottom: calc(var(--edge) * 2);
+}
+
+.tileTitle {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 1.5);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--edge) * 1.25);
+  font-size: var(--text-caption);
+  color: var(--ink-muted);
+}
+
+.rowMeta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.goalRow {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 1);
+}
+
+.goalHead {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--edge) * 1.5);
+  font-size: var(--text-caption);
+}
+
+.goalWhen {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--turquoise);
+}
+
+/* ---- Пометка о демонстрационных данных ---- */
+.synthetic {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--edge) * 1.25);
+  margin-top: calc(var(--edge) * 5);
+  padding-top: calc(var(--edge) * 2.5);
+  border-top: 1px solid var(--line);
+  font-size: var(--text-caption);
+  color: var(--ink-faint);
+}
+
+@media (max-width: 640px) {
+  .moneyLine {
+    gap: calc(var(--edge) * 4);
+    padding-block: calc(var(--edge) * 5) calc(var(--edge) * 4);
+  }
+
+  /* Знак слева, кнопка справа, дата отдельной строкой под ними. */
+  .date {
+    width: 100%;
+    margin-left: 0;
+    order: 3;
+  }
+
+  .quickEntry {
+    margin-left: auto;
+  }
+}

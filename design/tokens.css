@@ -1,0 +1,131 @@
+/* ============================================================================
+   ORBIT — токены.
+   ЕДИНСТВЕННЫЙ источник правды по цвету, размеру и отступу.
+   Значения взяты из docs/BRANDBOOK.md буквально. Расходиться с ним нельзя.
+
+   Тёмная поверхность основная (dark-first): физическая сцена — 23:00, комната,
+   одна лампа, ноутбук. Земля — обожжённый марганец с фиолетово-коричневым
+   подтоном, а не нейтральный чёрный.
+   ============================================================================ */
+
+@theme {
+  /* ---- Поверхности ---- */
+  --color-ground: #17131c;
+  --color-ground-raised: #1f1926;
+  --color-ground-sunken: #110e15;
+  --color-line: #322a3c;
+  --color-line-strong: #473c54;
+
+  /* ---- Чернила ---- */
+  --color-ink: #ede6d8; /* ганч, 15.0:1 к земле */
+  --color-ink-muted: #9e93ab; /* 6.4:1 */
+  --color-ink-faint: #6b6078; /* 3.6:1 — только от 18px */
+
+  /* ---- Глазури. Роли семантические, не декоративные ---- */
+  --color-lapis: #6486f5; /* структура, действие, ссылка — 5.5:1 */
+  --color-lapis-fill: #2d4bc4; /* заливка кнопки */
+  --color-turquoise: #3fcfbc; /* приход, прогресс, выполнено — 9.6:1 */
+  --color-ochre: #d9a441; /* дедлайн, внимание — 8.3:1 */
+  --color-pomegranate: #e05c55; /* расход, просрочено — 5.2:1 */
+
+  /* ---- Ребро гириха. Всё кратно ему ---- */
+  --spacing-edge: 8px;
+
+  /* ---- Типографика ---- */
+  --font-display: "Unbounded", "Trebuchet MS", sans-serif;
+  --font-text: "Golos Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Martian Mono", ui-monospace, monospace;
+
+  /* Шкала на √φ ≈ 1.272, крупные скачки на φ ≈ 1.618 */
+  --text-label: 10px;
+  --text-caption: 13px;
+  --text-body: 16px;
+  --text-subtitle: 20px;
+  --text-title: 26px;
+  --text-heading: 33px;
+  --text-display-2: 42px;
+  --text-display-1: 68px;
+
+  /* ---- Движение. Тесьма непрерывна: элементы прочерчиваются ---- */
+  --ease-orbit: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root {
+  color-scheme: dark;
+
+  --ground: #17131c;
+  --ground-raised: #1f1926;
+  --ground-sunken: #110e15;
+  --line: #322a3c;
+  --line-strong: #473c54;
+  --ink: #ede6d8;
+  --ink-muted: #9e93ab;
+  --ink-faint: #6b6078;
+  --lapis: #6486f5;
+  --lapis-fill: #2d4bc4;
+  --turquoise: #3fcfbc;
+  --ochre: #d9a441;
+  --pomegranate: #e05c55;
+  --pattern-alpha: 0.035;
+
+  --edge: 8px;
+  --chamfer: 10px;
+  --chamfer-sm: 4px;
+
+  --t-instant: 90ms;
+  --t-quick: 160ms;
+  --t-base: 240ms;
+  --t-slow: 400ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Светлая поверхность — ганч, необожжённая штукатурка медресе.
+   Не инверсия тёмной, а собственный набор. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+
+    --ground: #f2ebdd;
+    --ground-raised: #fbf7ef;
+    --ground-sunken: #e9e0ce;
+    --line: #ddd2be;
+    --line-strong: #c4b69c;
+    --ink: #201a27;
+    --ink-muted: #5c5266;
+    --ink-faint: #8b8093;
+    --lapis: #2340b8;
+    --lapis-fill: #2340b8;
+    --turquoise: #17786e;
+    --ochre: #8a5e15;
+    --pomegranate: #a82f2a;
+    --pattern-alpha: 0.05;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --ground: #f2ebdd;
+  --ground-raised: #fbf7ef;
+  --ground-sunken: #e9e0ce;
+  --line: #ddd2be;
+  --line-strong: #c4b69c;
+  --ink: #201a27;
+  --ink-muted: #5c5266;
+  --ink-faint: #8b8093;
+  --lapis: #2340b8;
+  --lapis-fill: #2340b8;
+  --turquoise: #17786e;
+  --ochre: #8a5e15;
+  --pomegranate: #a82f2a;
+  --pattern-alpha: 0.05;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-instant: 0ms;
+    --t-quick: 0ms;
+    --t-base: 0ms;
+    --t-slow: 0ms;
+  }
+}

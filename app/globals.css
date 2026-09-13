@@ -1,0 +1,56 @@
+@import "tailwindcss";
+@import "../design/tokens.css";
+@import "../design/primitives.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  text-wrap: balance;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--lapis);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Фокус виден всегда. Гирих-узел в углу вместо стандартного кольца. */
+:focus-visible {
+  outline: 2px solid var(--lapis);
+  outline-offset: 2px;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
