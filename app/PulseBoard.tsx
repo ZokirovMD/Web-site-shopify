@@ -2,72 +2,84 @@
 
 import { useMemo, useState } from "react";
 import { Bar, Label, Mark, Node, Numeral, Tile } from "@/design/primitives";
-import { add, format, fromMajor, scale, type Money } from "@/core/money";
+import { addDays, today } from "@/core/date";
+import { format, subtract } from "@/core/money";
+import {
+  balanceOn,
+  burnRate,
+  firstShortfall,
+  fundedOn,
+  project,
+  safeToSpend,
+} from "@/core/projection";
 import ru from "@/i18n/ru.json";
+import {
+  DEMO_ACCOUNTS,
+  DEMO_BUFFER,
+  DEMO_GOAL,
+  DEMO_HABITS,
+  DEMO_OBLIGATIONS,
+  DEMO_RATES,
+  demoRules,
+} from "./demo-data";
 import { ProjectionScrubber } from "./ProjectionScrubber";
 import styles from "./page.module.css";
 
-/**
- * ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ.
- *
- * Настоящих счетов и операций владельца в системе ещё нет, и выдумывать их нельзя
- * (PRODUCT.md → Evidence on Hand). Эти числа авторские, помечены в интерфейсе
- * и уйдут, как только появится база и реальные данные.
- */
-const DEMO = {
-  balance: fromMajor(4_820_000, "UZS"),
-  dailyBurn: fromMajor(50_000, "UZS"),
-  monthlyIncome: fromMajor(2_400_000, "UZS"),
-  goal: { title: "Ноутбук", target: fromMajor(14_000_000, "UZS"), saved: fromMajor(5_600_000, "UZS") },
-  obligations: [
-    { title: "Матанализ — домашка", when: "3 дня", urgency: "attention" as const },
-    { title: "Отчёт по практике", when: "9 дней", urgency: "normal" as const },
-    { title: "Оплата курса", when: "14 дней", urgency: "normal" as const },
-  ],
-  habits: [
-    { title: "Зал", done: true, streak: 12 },
-    { title: "Чтение", done: true, streak: 31 },
-    { title: "Английский", done: false, streak: 4 },
-  ],
-};
+const HORIZON_DAYS = 90;
+const CURRENCY = "UZS" as const;
 
 const URGENCY_ROLE = {
   attention: "ochre",
   normal: "faint",
 } as const;
 
-/**
- * Упрощённая проекция для демонстрации первого экрана.
- * Настоящий движок (core/projection) приходит в Фазе 1 и заменит это целиком —
- * он умеет повторяющиеся правила, календарные месяцы и материализацию.
- */
-function projectBalance(base: Money, dailyBurn: Money, monthlyIncome: Money, days: number): Money {
-  const spent = scale(dailyBurn, -days);
-  const earned = scale(monthlyIncome, days / 30);
-  return add(add(base, spent), earned);
-}
-
 export function PulseBoard() {
   const [days, setDays] = useState(31);
 
-  const projected = useMemo(
-    () => projectBalance(DEMO.balance, DEMO.dailyBurn, DEMO.monthlyIncome, days),
-    [days],
-  );
+  /**
+   * Настоящий движок проекций из core/projection — тот же, что обслуживает
+   * цели и сметы бизнеса. Экран ничего не считает сам.
+   */
+  const { series, start } = useMemo(() => {
+    const from = today();
+    return {
+      start: from,
+      series: project({
+        from,
+        to: addDays(from, HORIZON_DAYS),
+        accounts: DEMO_ACCOUNTS,
+        transactions: [],
+        rules: demoRules(from),
+        rates: DEMO_RATES,
+        currency: CURRENCY,
+      }),
+    };
+  }, []);
 
-  const projectedDate = useMemo(() => {
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" }).format(date);
-  }, [days]);
+  const balanceNow = series[0]?.closing ?? null;
+  const targetDate = addDays(start, days);
+  const projected = balanceOn(series, targetDate);
+  const burn = burnRate(series, CURRENCY);
+  const safe = safeToSpend(series, DEMO_BUFFER, CURRENCY);
+  const shortfall = firstShortfall(series);
 
-  const today = useMemo(
-    () => new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", weekday: "long" }).format(new Date()),
+  const goalRemaining = subtract(DEMO_GOAL.target, DEMO_GOAL.saved);
+  const goalFunded = fundedOn(series, goalRemaining, DEMO_BUFFER);
+  const goalPct = Math.round((DEMO_GOAL.saved.amount / DEMO_GOAL.target.amount) * 100);
+
+  const humanDate = (iso: string) =>
+    new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" }).format(
+      new Date(`${iso}T12:00:00Z`),
+    );
+
+  const todayLong = useMemo(
+    () =>
+      new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+        weekday: "long",
+      }).format(new Date()),
     [],
-  );
-
-  const goalPct = Math.round(
-    (DEMO.goal.saved.amount / DEMO.goal.target.amount) * 100,
   );
 
   return (
@@ -77,7 +89,7 @@ export function PulseBoard() {
           <OrbitMark />
           <span className={styles.brandName}>{ru.brand.name}</span>
         </div>
-        <span className={styles.date}>{today}</span>
+        <span className={styles.date}>{todayLong}</span>
         <button type="button" className={styles.quickEntry}>
           {ru.common.add}
         </button>
@@ -87,34 +99,42 @@ export function PulseBoard() {
         <div className={styles.moneyPrimary}>
           <Label>{ru.pulse.balanceNow}</Label>
           <span className={styles.balance}>
-            {format(DEMO.balance, { currency: false })}
-            <span className="o-numeral__currency">UZS</span>
+            {balanceNow ? format(balanceNow, { currency: false }) : "—"}
+            <span className="o-numeral__currency">{CURRENCY}</span>
           </span>
         </div>
 
         <div className={styles.moneySecondary}>
           <div className={styles.cell}>
-            <Label>{`${ru.pulse.balanceProjected} · ${projectedDate}`}</Label>
+            <Label>{`${ru.pulse.balanceProjected} · ${humanDate(targetDate)}`}</Label>
             {/* Это остаток на дату, а не прирост — поэтому без знака «плюс».
                 Направление читается цветом И подписью, никогда одним цветом. */}
             <span
-              className={`${styles.cellValue} ${projected.amount < 0 ? styles.out : styles.in}`}
+              className={`${styles.cellValue} ${
+                projected && projected.amount < 0 ? styles.out : styles.in
+              }`}
             >
-              {format(projected, { currency: false })}
-            </span>
-          </div>
-          <div className={styles.cell}>
-            <Label>{ru.pulse.incomeMonth}</Label>
-            <span className={`${styles.cellValue} ${styles.in}`}>
-              {format(DEMO.monthlyIncome, { sign: true, currency: false })}
+              {projected ? format(projected, { currency: false }) : "—"}
             </span>
           </div>
           <div className={styles.cell}>
             <Label>{ru.pulse.burnDaily}</Label>
-            <span className={styles.cellValue}>
-              {format(DEMO.dailyBurn, { currency: false })}
+            <span className={styles.cellValue}>{format(burn, { currency: false })}</span>
+          </div>
+          <div className={styles.cell}>
+            <Label>{ru.pulse.safeToSpend}</Label>
+            <span className={`${styles.cellValue} ${styles.in}`}>
+              {format(safe, { currency: false })}
             </span>
           </div>
+          {shortfall ? (
+            <div className={styles.cell}>
+              <Label>{ru.pulse.shortfall}</Label>
+              <span className={`${styles.cellValue} ${styles.out}`}>
+                {humanDate(shortfall)}
+              </span>
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -122,9 +142,10 @@ export function PulseBoard() {
         label={ru.pulse.scrubber}
         hint={ru.pulse.scrubberHint}
         todayLabel={ru.pulse.today}
+        maxDays={HORIZON_DAYS}
         defaultDays={31}
         onChange={setDays}
-        formatDay={(d) => ru.pulse.plusDays.replace("{days}", String(d))}
+        formatDay={(value) => ru.pulse.plusDays.replace("{days}", String(value))}
       />
 
       <section className={styles.tiles}>
@@ -134,7 +155,7 @@ export function PulseBoard() {
             <span className={styles.tileTitle}>{ru.pulse.obligations.toUpperCase()}</span>
           </div>
           <div className={styles.rows}>
-            {DEMO.obligations.map((item) => (
+            {DEMO_OBLIGATIONS.map((item) => (
               <div key={item.title} className={styles.row}>
                 <Mark role={URGENCY_ROLE[item.urgency]} />
                 <span>{item.title}</span>
@@ -150,7 +171,7 @@ export function PulseBoard() {
             <span className={styles.tileTitle}>{ru.pulse.habits.toUpperCase()}</span>
           </div>
           <div className={styles.rows}>
-            {DEMO.habits.map((item) => (
+            {DEMO_HABITS.map((item) => (
               <div key={item.title} className={styles.row}>
                 <Node role={item.done ? "turquoise" : "faint"} filled={item.done} />
                 <span>{item.title}</span>
@@ -167,18 +188,24 @@ export function PulseBoard() {
           </div>
           <div className={styles.goalRow}>
             <div className={styles.goalHead}>
-              <span>{DEMO.goal.title}</span>
-              <span className={styles.goalWhen}>{goalPct}%</span>
+              <span>{DEMO_GOAL.title}</span>
+              <span className={styles.goalWhen}>
+                {goalFunded ? humanDate(goalFunded) : ru.pulse.notOnHorizon}
+              </span>
             </div>
             <Bar
-              value={DEMO.goal.saved.amount}
-              max={DEMO.goal.target.amount}
-              label={DEMO.goal.title}
+              value={DEMO_GOAL.saved.amount}
+              max={DEMO_GOAL.target.amount}
+              label={DEMO_GOAL.title}
             />
             <div className={styles.row}>
-              <Numeral value={DEMO.goal.saved} size="var(--text-caption)" showCurrency={false} />
+              <Numeral
+                value={DEMO_GOAL.saved}
+                size="var(--text-caption)"
+                showCurrency={false}
+              />
               <span className={styles.rowMeta}>
-                из {format(DEMO.goal.target, { currency: false })}
+                {goalPct}% из {format(DEMO_GOAL.target, { currency: false })}
               </span>
             </div>
           </div>

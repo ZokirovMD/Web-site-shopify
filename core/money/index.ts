@@ -13,9 +13,17 @@
 
 export type CurrencyCode = "UZS" | "USD";
 
-export const CURRENCIES: Record<CurrencyCode, { minorUnits: number; symbol: string }> = {
-  UZS: { minorUnits: 100, symbol: "сум" },
-  USD: { minorUnits: 100, symbol: "$" },
+export const CURRENCIES: Record<
+  CurrencyCode,
+  { minorUnits: number; symbol: string; displayFractionDigits: number }
+> = {
+  /**
+   * Хранится ×100 ради единообразия — одно правило на все валюты дешевле,
+   * чем таблица исключений. Но НЕ показывается дробным: тийины вышли
+   * из оборота, и «66 483,52 сум» на экране — это мусор, а не точность.
+   */
+  UZS: { minorUnits: 100, symbol: "сум", displayFractionDigits: 0 },
+  USD: { minorUnits: 100, symbol: "$", displayFractionDigits: 2 },
 };
 
 /** Сумма в минорных единицах. Бренд не даёт перепутать её с обычным числом. */
@@ -139,8 +147,9 @@ export function format(
   const { sign = false, currency = true } = options;
   const major = toMajor(value);
   const abs = Math.abs(major);
-  const units = CURRENCIES[value.currency].minorUnits;
-  const fractionDigits = value.amount % units === 0 ? 0 : 2;
+  const spec = CURRENCIES[value.currency];
+  const fractionDigits =
+    value.amount % spec.minorUnits === 0 ? 0 : spec.displayFractionDigits;
 
   const digits = new Intl.NumberFormat("ru-RU", {
     minimumFractionDigits: fractionDigits,

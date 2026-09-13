@@ -41,7 +41,10 @@
     "scrubber": "Проекция",
     "scrubberHint": "Тяни тесьму — всё пересчитается",
     "today": "Сегодня",
-    "plusDays": "+{days} дней"
+    "plusDays": "+{days} дней",
+    "safeToSpend": "Можно потратить",
+    "shortfall": "Деньги кончатся",
+    "notOnHorizon": "не на горизонте"
   },
   "empty": {
     "rules": {
