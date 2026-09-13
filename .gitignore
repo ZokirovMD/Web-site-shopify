@@ -32,3 +32,6 @@ dist/
 .idea/
 .vscode/
 *.log
+
+# артефакты TypeScript
+*.tsbuildinfo
