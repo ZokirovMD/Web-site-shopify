@@ -88,7 +88,8 @@ CREATE TABLE "categories" (
 	"source" "source" DEFAULT 'manual' NOT NULL,
 	"source_run" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "categories_user_id_id_pk" PRIMARY KEY("user_id","id")
 );
 --> statement-breakpoint
 CREATE TABLE "contexts" (
@@ -100,7 +101,8 @@ CREATE TABLE "contexts" (
 	"source" "source" DEFAULT 'manual' NOT NULL,
 	"source_run" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "contexts_user_id_id_pk" PRIMARY KEY("user_id","id")
 );
 --> statement-breakpoint
 CREATE TABLE "fx_rates" (
@@ -155,7 +157,8 @@ CREATE TABLE "motives" (
 	"source" "source" DEFAULT 'manual' NOT NULL,
 	"source_run" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "motives_user_id_id_pk" PRIMARY KEY("user_id","id")
 );
 --> statement-breakpoint
 CREATE TABLE "recurring_rules" (

@@ -13,6 +13,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  primaryKey,
   real,
   smallint,
   text,
@@ -74,7 +75,12 @@ export const categories = pgTable(
     orderKey,
     ...auditColumns,
   },
-  (table) => [index("categories_user_idx").on(table.userId, table.direction)],
+  (table) => [
+    // Справочник принадлежит пользователю: один и тот же "food.cafe" живёт
+    // у каждого свой. Ключ составной, иначе два пользователя не уживутся.
+    primaryKey({ columns: [table.userId, table.id] }),
+    index("categories_user_idx").on(table.userId, table.direction),
+  ],
 );
 
 /** «С кем»: один, семья, друзья, университет… Размечает и траты, и события. */
@@ -90,7 +96,10 @@ export const contexts = pgTable(
     orderKey,
     ...auditColumns,
   },
-  (table) => [index("contexts_user_idx").on(table.userId)],
+  (table) => [
+    primaryKey({ columns: [table.userId, table.id] }),
+    index("contexts_user_idx").on(table.userId),
+  ],
 );
 
 /** «Зачем»: необходимость, вложение, удовольствие, импульс… */
@@ -107,7 +116,10 @@ export const motives = pgTable(
     orderKey,
     ...auditColumns,
   },
-  (table) => [index("motives_user_idx").on(table.userId)],
+  (table) => [
+    primaryKey({ columns: [table.userId, table.id] }),
+    index("motives_user_idx").on(table.userId),
+  ],
 );
 
 export const fxRates = pgTable(
