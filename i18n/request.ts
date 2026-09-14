@@ -1,5 +1,5 @@
 import { getRequestConfig } from "next-intl/server";
-import { DEFAULT_LOCALE, TIME_ZONE, isLocale } from "./config";
+import { DEFAULT_LOCALE, FORMATS, TIME_ZONE, isLocale } from "./config";
 
 /**
  * Конфигурация next-intl на каждый запрос.
@@ -17,14 +17,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale,
     timeZone: TIME_ZONE,
     messages: (await import(`./messages/${locale}.json`)).default,
-    formats: {
-      dateTime: {
-        /** «14 сентября» — подпись под числом на ПУЛЬСЕ. */
-        day: { day: "numeric", month: "long" },
-        /** «воскресенье, 14 сентября» — шапка дня. */
-        weekday: { weekday: "long", day: "numeric", month: "long" },
-        short: { day: "2-digit", month: "2-digit", year: "numeric" },
-      },
-    },
+    formats: FORMATS,
   };
 });

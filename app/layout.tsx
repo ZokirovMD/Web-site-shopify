@@ -3,6 +3,7 @@ import { Golos_Text, Martian_Mono, Unbounded } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { ServiceWorker } from "@/components/shell/ServiceWorker";
+import { FORMATS, TIME_ZONE } from "@/i18n/config";
 import "./globals.css";
 
 /**
@@ -75,7 +76,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${unbounded.variable} ${golos.variable} ${martian.variable}`}
     >
       <body>
-        <NextIntlClientProvider messages={messages}>
+        {/* formats и timeZone передаются явно: серверная конфигурация сама
+            до клиентских компонентов не доезжает, и `dateTime(date, "weekday")`
+            там падает на отсутствующем формате. */}
+        <NextIntlClientProvider
+          messages={messages}
+          formats={FORMATS}
+          timeZone={TIME_ZONE}
+        >
           {children}
           <ServiceWorker />
         </NextIntlClientProvider>

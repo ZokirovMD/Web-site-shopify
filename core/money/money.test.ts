@@ -11,6 +11,7 @@ import {
   minor,
   money,
   negate,
+  parseAmount,
   scale,
   subtract,
   toMajor,
@@ -115,5 +116,51 @@ describe("дробные единицы по валютам", () => {
 
   it("доллары по-прежнему показывает с центами", () => {
     expect(format(money(450, "USD"))).toBe("4,50 $");
+  });
+});
+
+describe("разбор введённой суммы", () => {
+  it("понимает пробелы между разрядами", () => {
+    expect(parseAmount("50 000", "UZS")).toEqual(money(5_000_000, "UZS"));
+    expect(parseAmount("1 250 000", "UZS")).toEqual(money(125_000_000, "UZS"));
+  });
+
+  it("понимает и запятую, и точку", () => {
+    expect(parseAmount("12,50", "USD")).toEqual(money(1250, "USD"));
+    expect(parseAmount("12.5", "USD")).toEqual(money(1250, "USD"));
+  });
+
+  it("не теряет копейки на дробных долях", () => {
+    // 0.1 + 0.2 в деньгах недопустимо: считаем по строке, а не через float
+    expect(parseAmount("0.10", "USD")).toEqual(money(10, "USD"));
+    expect(parseAmount("1234567.89", "USD")).toEqual(money(123_456_789, "USD"));
+  });
+
+  it("округляет лишние знаки по первой отброшенной цифре", () => {
+    expect(parseAmount("12,345", "USD")).toEqual(money(1235, "USD"));
+    expect(parseAmount("12,344", "USD")).toEqual(money(1234, "USD"));
+  });
+
+  it("принимает минус", () => {
+    expect(parseAmount("-500", "UZS")).toEqual(money(-50_000, "UZS"));
+  });
+
+  it("отказывается от мусора, а не считает его нулём", () => {
+    expect(parseAmount("", "UZS")).toBeNull();
+    expect(parseAmount("   ", "UZS")).toBeNull();
+    expect(parseAmount("абв", "UZS")).toBeNull();
+    expect(parseAmount("50к", "UZS")).toBeNull();
+    expect(parseAmount("1,2,3", "UZS")).toBeNull();
+    expect(parseAmount("--5", "UZS")).toBeNull();
+    expect(parseAmount("5-", "UZS")).toBeNull();
+  });
+
+  it("отказывается от суммы, которая не переживёт округление числа", () => {
+    expect(parseAmount("999999999999999999", "UZS")).toBeNull();
+  });
+
+  it("пройденное через формат читается обратно тем же числом", () => {
+    const value = money(4_820_000, "UZS");
+    expect(parseAmount(format(value, { currency: false }), "UZS")).toEqual(value);
   });
 });

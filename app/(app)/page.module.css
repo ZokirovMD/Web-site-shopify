@@ -30,6 +30,9 @@
 }
 
 .quickEntry {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   font-family: var(--font-text);
   font-size: var(--text-caption);
   font-weight: 600;
@@ -207,4 +210,56 @@
   .quickEntry {
     margin-left: auto;
   }
+}
+
+/* ---- Пустой ПУЛЬС: счетов ещё нет ---- */
+
+.blank {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--edge) * 4);
+  flex-wrap: wrap;
+  padding-block: calc(var(--edge) * 8);
+}
+
+.blankText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--edge) * 2);
+}
+
+.blankTitle {
+  font-size: var(--text-heading);
+}
+
+.blankBody {
+  font-size: var(--text-body);
+  color: var(--ink-muted);
+  line-height: 1.6;
+  max-width: 54ch;
+}
+
+.blankAction {
+  display: inline-flex;
+  align-items: center;
+  height: calc(var(--edge) * 5.5);
+  padding-inline: calc(var(--edge) * 3);
+  background: var(--lapis-fill);
+  color: var(--ink-on-fill);
+  font-weight: 600;
+  text-decoration: none;
+  clip-path: polygon(
+    var(--chamfer-sm) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer-sm)),
+    calc(100% - var(--chamfer-sm)) 100%,
+    0 100%,
+    0 var(--chamfer-sm)
+  );
+  transition: filter var(--t-instant) var(--ease);
+}
+
+.blankAction:hover {
+  filter: brightness(1.12);
 }

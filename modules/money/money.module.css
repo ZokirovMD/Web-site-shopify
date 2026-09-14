@@ -1,0 +1,387 @@
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-inline: calc(var(--edge) * 2.5);
+  padding-block: 0 calc(var(--edge) * 12);
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(var(--edge) * 2);
+  flex-wrap: wrap;
+  padding-block: calc(var(--edge) * 4) calc(var(--edge) * 2.5);
+  border-bottom: 1px solid var(--line);
+}
+
+.title {
+  font-size: var(--text-heading);
+  margin-top: calc(var(--edge) * 0.75);
+}
+
+.totals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: calc(var(--edge) * 5);
+  padding-block: calc(var(--edge) * 5) calc(var(--edge) * 4);
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 0.5);
+}
+
+.balance {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(32px, 6vw, 52px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums slashed-zero;
+  letter-spacing: -0.025em;
+}
+
+.cellValue {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-subtitle);
+  font-variant-numeric: tabular-nums;
+}
+
+.in {
+  color: var(--turquoise);
+}
+
+.out {
+  color: var(--pomegranate);
+}
+
+/* ---- Секции ---- */
+
+.section {
+  position: relative;
+  margin-top: calc(var(--edge) * 5);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--edge) * 1.25);
+  margin-bottom: calc(var(--edge) * 2);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sectionNote {
+  margin-left: auto;
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+}
+
+/* ---- Списки ---- */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--edge) * 1.5);
+  padding-block: calc(var(--edge) * 1.5);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--text-caption);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowName {
+  color: var(--ink);
+}
+
+.rowMeta {
+  color: var(--ink-faint);
+  font-size: var(--text-label);
+}
+
+.rowMarks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--edge) * 0.75);
+  color: var(--ink-faint);
+  font-size: var(--text-label);
+}
+
+.rowAmount {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rowDate {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+  min-width: 9ch;
+}
+
+/* ---- Пустые состояния ---- */
+
+.empty {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--edge) * 3);
+  padding: calc(var(--edge) * 3) 0;
+}
+
+.emptyText {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 1);
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-subtitle);
+}
+
+.emptyBody {
+  font-size: var(--text-caption);
+  color: var(--ink-muted);
+  line-height: 1.55;
+  max-width: 52ch;
+}
+
+/* ---- Формы ---- */
+
+/*
+ * Раскрывашка стоит в потоке ПОСЛЕ заголовка, чтобы форма разворачивалась
+ * во всю ширину секции. Внутри заголовка (flex-строка) она сжималась бы
+ * до ширины своей кнопки — форма получалась 405px вместо 1180.
+ * Сама кнопка при этом визуально остаётся на строке заголовка.
+ */
+.disclosure {
+  display: block;
+}
+
+.disclosure > summary {
+  position: absolute;
+  top: 0;
+  right: 0;
+  list-style: none;
+  cursor: pointer;
+  font-size: var(--text-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--lapis);
+  padding: calc(var(--edge) * 0.75) calc(var(--edge) * 1.5);
+  border: 1px solid var(--line);
+}
+
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure > summary:hover {
+  border-color: var(--lapis);
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: calc(var(--edge) * 2);
+  /* По верху, а не по низу: у поля с подсказкой высота больше, и при
+     выравнивании по низу его подпись уезжает вверх относительно соседей. */
+  align-items: start;
+  padding: calc(var(--edge) * 3);
+  margin-top: calc(var(--edge) * 2);
+  background: var(--ground-raised);
+  border: 1px solid var(--line);
+  clip-path: polygon(
+    var(--chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0 100%,
+    0 var(--chamfer)
+  );
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 0.75);
+  min-width: 0;
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.input,
+.select {
+  appearance: none;
+  width: 100%;
+  height: calc(var(--edge) * 5);
+  padding-inline: calc(var(--edge) * 1.5);
+  background: var(--ground-sunken);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  transition: border-color var(--t-instant) var(--ease);
+}
+
+.select {
+  /* Своя стрелка: системная не поддаётся теме и выдаёт платформу. */
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-muted) 50%),
+    linear-gradient(135deg, var(--ink-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% + 1px),
+    calc(100% - 13px) calc(50% + 1px);
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: calc(var(--edge) * 4);
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--lapis);
+}
+
+.amount {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-subtitle);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.hint {
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+}
+
+.formNote {
+  grid-column: 1 / -1;
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--edge) * 2);
+}
+
+.submit {
+  height: calc(var(--edge) * 5.5);
+  padding-inline: calc(var(--edge) * 3);
+  background: var(--lapis-fill);
+  border: 0;
+  color: var(--ink-on-fill);
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  font-weight: 600;
+  cursor: pointer;
+  clip-path: polygon(
+    var(--chamfer-sm) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer-sm)),
+    calc(100% - var(--chamfer-sm)) 100%,
+    0 100%,
+    0 var(--chamfer-sm)
+  );
+  transition: filter var(--t-instant) var(--ease);
+}
+
+.submit:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Ошибка называет причину, а не «что-то пошло не так». */
+.error {
+  grid-column: 1 / -1;
+  padding: calc(var(--edge) * 1.25) calc(var(--edge) * 1.5);
+  border-left: 2px solid var(--pomegranate);
+  background: var(--ground-sunken);
+  color: var(--ink);
+  font-size: var(--text-caption);
+}
+
+.done {
+  font-size: var(--text-caption);
+  color: var(--turquoise);
+}
+
+/* ---- Переключатель правила ---- */
+
+.toggle {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-family: var(--font-text);
+  font-size: var(--text-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: calc(var(--edge) * 0.5) calc(var(--edge) * 1.25);
+  cursor: pointer;
+  transition:
+    border-color var(--t-instant) var(--ease),
+    color var(--t-instant) var(--ease);
+}
+
+.toggle[data-active="true"] {
+  color: var(--turquoise);
+  border-color: var(--turquoise);
+}
+
+.toggle:hover {
+  border-color: var(--line-strong);
+}
+
+.dim {
+  opacity: 0.55;
+}
+
+@media (max-width: 640px) {
+  .totals {
+    gap: calc(var(--edge) * 3);
+    padding-block: calc(var(--edge) * 4) calc(var(--edge) * 3);
+  }
+
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .rowAmount {
+    margin-left: auto;
+  }
+}

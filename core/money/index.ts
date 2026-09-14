@@ -164,3 +164,43 @@ export function format(
 
   return `${prefix}${digits}${suffix}`;
 }
+
+/**
+ * Разбор суммы, набранной руками.
+ *
+ * Владелец вводит всё сам, и вводит по-человечески: «50 000», «50000»,
+ * «1 250,50», «12.5». Всё это одна и та же сумма, и требовать канонической
+ * формы значит превратить быстрый ввод в заполнение анкеты.
+ *
+ * Чего парсер НЕ делает: не угадывает валюту, не принимает выражения и не
+ * трактует мусор как ноль. Пустая строка и «абв» дают null, а не 0 — тихий
+ * ноль в деньгах опаснее отказа.
+ */
+export function parseAmount(input: string, currency: CurrencyCode): Money | null {
+  // Пробелы любых сортов — разделители разрядов: обычный, неразрывный,
+  // узкий неразрывный и апостроф, которым тоже разделяют.
+  const cleaned = input
+    .replace(/[\s   ']/g, "")
+    .replace(",", ".")
+    .trim();
+
+  if (cleaned === "") return null;
+  // Один знак минуса спереди, цифры, не более одной точки.
+  if (!/^-?\d+(\.\d+)?$/.test(cleaned)) return null;
+
+  const units = CURRENCIES[currency].minorUnits;
+  const negative = cleaned.startsWith("-");
+  const [whole = "0", fraction = ""] = cleaned.replace("-", "").split(".");
+
+  // Считаем по строке, а не через parseFloat: 0.1 + 0.2 в деньгах недопустимо.
+  const scale = String(units).length - 1;
+  const padded = (fraction + "0".repeat(scale)).slice(0, scale);
+  const rest = fraction.slice(scale);
+
+  let amount = Number(whole) * units + Number(padded || "0");
+  // Первая отброшенная цифра решает округление: 12,345 → 12,35.
+  if (rest.length > 0 && Number(rest[0]) >= 5) amount += 1;
+
+  if (!Number.isSafeInteger(amount)) return null;
+  return money(negative ? -amount : amount, currency);
+}

@@ -25,6 +25,25 @@ export const DEFAULT_LOCALE: Locale = "ru";
  */
 export const TIME_ZONE = "Asia/Tashkent";
 
+/**
+ * Именованные форматы даты — общие для сервера и клиента.
+ *
+ * Живут здесь, а не в `request.ts`, потому что их нужно ОТДЕЛЬНО передать
+ * в `NextIntlClientProvider`: серверная конфигурация до клиентских компонентов
+ * сама не доезжает, и `formatter.dateTime(date, "weekday")` в клиентском
+ * компоненте падает с MISSING_FORMAT. Это видно только в браузере — сборка
+ * и типы молчат.
+ */
+export const FORMATS = {
+  dateTime: {
+    /** «14 сентября» — подпись под числом. */
+    day: { day: "numeric", month: "long" },
+    /** «понедельник, 14 сентября» — шапка дня. */
+    weekday: { weekday: "long", day: "numeric", month: "long" },
+    short: { day: "2-digit", month: "2-digit", year: "numeric" },
+  },
+} as const;
+
 export function isLocale(value: string | undefined): value is Locale {
   return value !== undefined && (LOCALES as readonly string[]).includes(value);
 }

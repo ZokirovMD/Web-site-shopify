@@ -1,108 +1,110 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useFormatter, useTimeZone, useTranslations } from "next-intl";
-import { Bar, Label, Mark, Node, Numeral, Tile } from "@/design/primitives";
-import { addDays, todayIn, type CalendarDate } from "@/core/date";
-import { format, subtract } from "@/core/money";
-import { TIME_ZONE } from "@/i18n/config";
+import { useState } from "react";
+import Link from "next/link";
+import { useFormatter, useTranslations } from "next-intl";
+import { Bar, Label, Node, Numeral, Tile } from "@/design/primitives";
+import { GirihEmpty } from "@/design/GirihEmpty";
+import { addDays, type CalendarDate } from "@/core/date";
+import { format, subtract, type CurrencyCode, type Money } from "@/core/money";
 import {
   balanceOn,
   burnRate,
   firstShortfall,
   fundedOn,
-  project,
   safeToSpend,
+  type DailyBalance,
 } from "@/core/projection";
-import {
-  DEMO_ACCOUNTS,
-  DEMO_BUFFER,
-  DEMO_GOAL,
-  DEMO_HABITS,
-  DEMO_OBLIGATIONS,
-  DEMO_RATES,
-  demoRules,
-} from "./demo-data";
+import type { GoalRow } from "@/db/queries/money";
 import { ProjectionScrubber } from "./ProjectionScrubber";
 import styles from "./page.module.css";
 
 const HORIZON_DAYS = 90;
-const CURRENCY = "UZS" as const;
 
-const URGENCY_ROLE = {
-  attention: "ochre",
-  normal: "faint",
-} as const;
-
-export function PulseBoard() {
+/**
+ * ПУЛЬС — один экран на день.
+ *
+ * Проекция считается на сервере и приезжает готовым рядом: скраббер только
+ * выбирает день из уже посчитанного, поэтому тянется мгновенно и не ходит
+ * в сеть на каждый пиксель.
+ *
+ * Демонстрационных данных здесь нет. Пусто — значит пусто, и пустое состояние
+ * говорит, что сделать, а не изображает заполненную систему.
+ */
+export function PulseBoard({
+  series,
+  start,
+  currency,
+  buffer,
+  goals,
+}: {
+  series: readonly DailyBalance[];
+  start: CalendarDate;
+  currency: CurrencyCode;
+  buffer: Money;
+  goals: readonly GoalRow[];
+}) {
   const [days, setDays] = useState(31);
   const t = useTranslations("pulse");
-  const tc = useTranslations("common");
   const formatter = useFormatter();
-  // Пояс задан в i18n/request.ts, но тип допускает его отсутствие —
-  // подстраховываемся той же константой, а не поясом машины.
-  const timeZone = useTimeZone() ?? TIME_ZONE;
-
-  /**
-   * Настоящий движок проекций из core/projection — тот же, что обслуживает
-   * цели и сметы бизнеса. Экран ничего не считает сам.
-   *
-   * Пояс задан явно: сервер в UTC и браузер в Ташкенте иначе взяли бы разные
-   * «сегодня», и вся проекция разъехалась бы на день.
-   */
-  const { series, start } = useMemo(() => {
-    const from = todayIn(timeZone);
-    return {
-      start: from,
-      series: project({
-        from,
-        to: addDays(from, HORIZON_DAYS),
-        accounts: DEMO_ACCOUNTS,
-        transactions: [],
-        rules: demoRules(from),
-        rates: DEMO_RATES,
-        currency: CURRENCY,
-      }),
-    };
-  }, [timeZone]);
-
-  const balanceNow = series[0]?.closing ?? null;
-  const targetDate = addDays(start, days);
-  const projected = balanceOn(series, targetDate);
-  const burn = burnRate(series, CURRENCY);
-  const safe = safeToSpend(series, DEMO_BUFFER, CURRENCY);
-  const shortfall = firstShortfall(series);
-
-  const goalRemaining = subtract(DEMO_GOAL.target, DEMO_GOAL.saved);
-  const goalFunded = fundedOn(series, goalRemaining, DEMO_BUFFER);
-  const goalPct = Math.round((DEMO_GOAL.saved.amount / DEMO_GOAL.target.amount) * 100);
 
   /** Полдень UTC: любой сдвиг пояса остаётся внутри тех же суток. */
   const atNoon = (date: CalendarDate) => new Date(`${date}T12:00:00Z`);
   const humanDate = (date: CalendarDate) => formatter.dateTime(atNoon(date), "day");
 
+  const header = (withAction: boolean) => (
+    <header className={styles.pageHead}>
+      <div>
+        <p className="o-label">{t("title")}</p>
+        <span className={styles.date}>
+          {formatter.dateTime(atNoon(start), "weekday")}
+        </span>
+      </div>
+      {/* На пустом экране кнопка не нужна: призыв уже стоит ниже, крупно,
+          и две одинаковые ссылки рядом только мешают выбрать. */}
+      {withAction ? (
+        <Link href="/dengi" className={styles.quickEntry}>
+          {t("openMoney")}
+        </Link>
+      ) : null}
+    </header>
+  );
+
+  if (series.length === 0) {
+    return (
+      <div className={styles.page}>
+        {header(false)}
+        <div className={styles.blank}>
+          <GirihEmpty size={168} />
+          <div className={styles.blankText}>
+            <h1 className={styles.blankTitle}>{t("noAccounts.title")}</h1>
+            <p className={styles.blankBody}>{t("noAccounts.body")}</p>
+            <Link href="/dengi" className={styles.blankAction}>
+              {t("noAccounts.action")}
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const balanceNow = series[0]?.closing ?? null;
+  const targetDate = addDays(start, days);
+  const projected = balanceOn(series, targetDate);
+  const burn = burnRate(series, currency);
+  const safe = safeToSpend(series, buffer, currency);
+  const shortfall = firstShortfall(series);
+
   return (
     <div className={styles.page}>
-      {/* Знак и навигация живут в оболочке (components/shell/TopStrap).
-          Здесь только то, что принадлежит самому ПУЛЬСУ. */}
-      <header className={styles.pageHead}>
-        <div>
-          <p className="o-label">{t("title")}</p>
-          <span className={styles.date}>
-            {formatter.dateTime(atNoon(start), "weekday")}
-          </span>
-        </div>
-        <button type="button" className={styles.quickEntry}>
-          {tc("add")}
-        </button>
-      </header>
+      {header(true)}
 
       <section className={styles.moneyLine}>
         <div className={styles.moneyPrimary}>
           <Label>{t("balanceNow")}</Label>
           <span className={styles.balance}>
             {balanceNow ? format(balanceNow, { currency: false }) : t("noValue")}
-            <span className="o-numeral__currency">{CURRENCY}</span>
+            <span className="o-numeral__currency">{currency}</span>
           </span>
         </div>
 
@@ -144,82 +146,63 @@ export function PulseBoard() {
         label={t("scrubber")}
         hint={t("scrubberHint")}
         todayLabel={t("today")}
-        maxDays={HORIZON_DAYS}
+        maxDays={Math.min(HORIZON_DAYS, series.length - 1)}
         defaultDays={31}
         onChange={setDays}
         formatDay={(value) => t("plusDays", { days: value })}
       />
 
-      <section className={styles.tiles}>
-        <Tile>
-          <div className={styles.tileHead}>
-            <Node role="ochre" />
-            <span className={styles.tileTitle}>{t("obligations").toUpperCase()}</span>
-          </div>
-          <div className={styles.rows}>
-            {DEMO_OBLIGATIONS.map((item) => (
-              <div key={item.title} className={styles.row}>
-                <Mark role={URGENCY_ROLE[item.urgency]} />
-                <span>{item.title}</span>
-                <span className={styles.rowMeta}>{item.when}</span>
-              </div>
-            ))}
-          </div>
-        </Tile>
-
-        <Tile>
-          <div className={styles.tileHead}>
-            <Node role="turquoise" />
-            <span className={styles.tileTitle}>{t("habits").toUpperCase()}</span>
-          </div>
-          <div className={styles.rows}>
-            {DEMO_HABITS.map((item) => (
-              <div key={item.title} className={styles.row}>
-                <Node role={item.done ? "turquoise" : "faint"} filled={item.done} />
-                <span>{item.title}</span>
-                <span className={styles.rowMeta}>{t("streak", { days: item.streak })}</span>
-              </div>
-            ))}
-          </div>
-        </Tile>
-
-        <Tile>
-          <div className={styles.tileHead}>
-            <Node role="lapis" />
-            <span className={styles.tileTitle}>{t("goals").toUpperCase()}</span>
-          </div>
-          <div className={styles.goalRow}>
-            <div className={styles.goalHead}>
-              <span>{DEMO_GOAL.title}</span>
-              <span className={styles.goalWhen}>
-                {goalFunded ? humanDate(goalFunded) : t("notOnHorizon")}
-              </span>
+      {goals.length > 0 ? (
+        <section className={styles.tiles}>
+          <Tile>
+            <div className={styles.tileHead}>
+              <Node role="lapis" />
+              <span className={styles.tileTitle}>{t("goals").toUpperCase()}</span>
             </div>
-            <Bar
-              value={DEMO_GOAL.saved.amount}
-              max={DEMO_GOAL.target.amount}
-              label={DEMO_GOAL.title}
-            />
-            <div className={styles.row}>
-              <Numeral
-                value={DEMO_GOAL.saved}
-                size="var(--text-caption)"
-                showCurrency={false}
-              />
-              <span className={styles.rowMeta}>
-                {t("goalProgress", {
-                  percent: goalPct,
-                  target: format(DEMO_GOAL.target, { currency: false }),
-                })}
-              </span>
-            </div>
-          </div>
-        </Tile>
-      </section>
+            {goals.map((goal) => {
+              const remaining = subtract(goal.target, goal.saved);
+              const funded = fundedOn(series, remaining, buffer);
+              const percent =
+                goal.target.amount === 0
+                  ? 0
+                  : Math.round((goal.saved.amount / goal.target.amount) * 100);
+
+              return (
+                <div key={goal.id} className={styles.goalRow}>
+                  <div className={styles.goalHead}>
+                    <span>{goal.title}</span>
+                    <span className={styles.goalWhen}>
+                      {funded ? humanDate(funded) : t("notOnHorizon")}
+                    </span>
+                  </div>
+                  <Bar
+                    value={goal.saved.amount}
+                    max={goal.target.amount}
+                    label={goal.title}
+                  />
+                  <div className={styles.row}>
+                    <Numeral
+                      value={goal.saved}
+                      size="var(--text-caption)"
+                      showCurrency={false}
+                    />
+                    <span className={styles.rowMeta}>
+                      {t("goalProgress", {
+                        percent,
+                        target: format(goal.target, { currency: false }),
+                      })}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </Tile>
+        </section>
+      ) : null}
 
       <p className={styles.synthetic}>
         <Node role="faint" />
-        {tc("syntheticNote")}
+        {t("coming")}
       </p>
     </div>
   );
