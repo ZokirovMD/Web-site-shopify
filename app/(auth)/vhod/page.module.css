@@ -1,0 +1,113 @@
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--edge) * 4) calc(var(--edge) * 2.5);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 2);
+  padding: calc(var(--edge) * 5);
+  background: var(--ground-raised);
+  border: 1px solid var(--line);
+  clip-path: polygon(
+    var(--chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0 100%,
+    0 var(--chamfer)
+  );
+}
+
+.mark {
+  align-self: center;
+  margin-bottom: calc(var(--edge) * 1);
+}
+
+.title {
+  font-size: var(--text-heading);
+  margin-top: calc(var(--edge) * -1);
+}
+
+.hint {
+  font-size: var(--text-caption);
+  color: var(--ink-muted);
+  line-height: 1.55;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 0.75);
+}
+
+.input {
+  appearance: none;
+  height: calc(var(--edge) * 5);
+  padding-inline: calc(var(--edge) * 1.5);
+  background: var(--ground-sunken);
+  border: 1px solid var(--line);
+  border-bottom-width: 1px;
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  transition: border-color var(--t-instant) var(--ease);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--lapis);
+}
+
+.submit {
+  height: calc(var(--edge) * 5.5);
+  margin-top: calc(var(--edge) * 1);
+  background: var(--lapis-fill);
+  border: 0;
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  font-weight: 600;
+  cursor: pointer;
+  clip-path: polygon(
+    var(--chamfer-sm) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer-sm)),
+    calc(100% - var(--chamfer-sm)) 100%,
+    0 100%,
+    0 var(--chamfer-sm)
+  );
+  transition: filter var(--t-instant) var(--ease);
+}
+
+.submit:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Ошибка называет причину, а не «что-то пошло не так». */
+.error {
+  padding: calc(var(--edge) * 1.25) calc(var(--edge) * 1.5);
+  border-left: 2px solid var(--pomegranate);
+  background: var(--ground-sunken);
+  color: var(--ink);
+  font-size: var(--text-caption);
+}
+
+.foot {
+  font-size: var(--text-label);
+  color: var(--ink-faint);
+  text-align: center;
+}
