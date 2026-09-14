@@ -20,6 +20,8 @@ dist/
 # скиллы восстанавливаются из skills-lock.json: npx skills install
 .agents/skills/
 .claude/skills/
+# копии скиллов, которые ставщик раскладывает для сторонних агентов
+agent/skills/
 
 # рабочие артефакты Impeccable (макеты, скриншоты, состояние сборки)
 .impeccable/review/
