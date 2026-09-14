@@ -5,7 +5,8 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
-import { hashPassword, passwordProblem, verifyPassword } from "./password";
+import { hashPassword, verifyPassword } from "./password";
+import { passwordProblem, type PasswordProblem } from "./rules";
 import {
   createSession,
   currentUser,
@@ -14,9 +15,31 @@ import {
   tooManyAttempts,
 } from "./session";
 
+/**
+ * Ошибки формы — КЛЮЧИ словаря, а не готовые фразы.
+ *
+ * Серверное действие не знает языка вызывающего: пробрасывать сюда локаль ради
+ * одной строки значит тащить контекст запроса в бизнес-логику. Ключ переводится
+ * там, где он показывается, — в форме.
+ */
+export type AuthError =
+  | "badEmail"
+  | "noPassword"
+  | "checkFields"
+  | "tooManyAttempts"
+  | "badCredentials"
+  | "repeatMismatch"
+  | "alreadySet"
+  | PasswordProblem;
+
 export interface FormState {
-  error?: string;
+  error?: AuthError;
   ok?: boolean;
+}
+
+/** Zod отдаёт `message` строкой — в схемах ниже туда положены те же ключи. */
+function firstIssue(issues: readonly { message: string }[]): AuthError {
+  return (issues[0]?.message ?? "checkFields") as AuthError;
 }
 
 /**
@@ -25,8 +48,8 @@ export interface FormState {
  * до хеширования это будущая невозможность войти.
  */
 const credentials = z.object({
-  email: z.string().trim().toLowerCase().email("Это не похоже на почту"),
-  password: z.string().min(1, "Введи пароль"),
+  email: z.string().trim().toLowerCase().email("badEmail"),
+  password: z.string().min(1, "noPassword"),
 });
 
 export async function signIn(_prev: FormState, form: FormData): Promise<FormState> {
@@ -34,15 +57,11 @@ export async function signIn(_prev: FormState, form: FormData): Promise<FormStat
     email: form.get("email"),
     password: form.get("password"),
   });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Проверь поля" };
-  }
+  if (!parsed.success) return { error: firstIssue(parsed.error.issues) };
 
   const { email, password } = parsed.data;
 
-  if (await tooManyAttempts(email)) {
-    return { error: "Слишком много попыток. Подожди 15 минут" };
-  }
+  if (await tooManyAttempts(email)) return { error: "tooManyAttempts" };
 
   const rows = await db
     .select({ id: users.id, passwordHash: users.passwordHash })
@@ -59,7 +78,7 @@ export async function signIn(_prev: FormState, form: FormData): Promise<FormStat
   const ok = user ? await verifyPassword(user.passwordHash, password) : false;
 
   await recordAttempt(email, ok);
-  if (!ok || !user) return { error: "Почта или пароль не подошли" };
+  if (!ok || !user) return { error: "badCredentials" };
 
   await createSession(user.id);
   redirect("/");
@@ -73,12 +92,12 @@ export async function signIn(_prev: FormState, form: FormData): Promise<FormStat
  */
 const firstPassword = z
   .object({
-    email: z.string().trim().toLowerCase().email("Это не похоже на почту"),
+    email: z.string().trim().toLowerCase().email("badEmail"),
     password: z.string(),
     repeat: z.string(),
   })
   .refine((v) => v.password === v.repeat, {
-    message: "Пароли не совпали",
+    message: "repeatMismatch",
     path: ["repeat"],
   });
 
@@ -91,9 +110,7 @@ export async function setFirstPassword(
     password: form.get("password"),
     repeat: form.get("repeat"),
   });
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Проверь поля" };
-  }
+  if (!parsed.success) return { error: firstIssue(parsed.error.issues) };
 
   const { email, password } = parsed.data;
 
@@ -107,12 +124,10 @@ export async function setFirstPassword(
     .limit(1);
 
   const user = rows[0];
-  if (!user) return { error: "Почта или пароль не подошли" };
+  if (!user) return { error: "badCredentials" };
 
   // Пароль уже задан — сюда попадать нельзя, иначе это сброс пароля без проверки.
-  if (user.passwordHash.length > 0) {
-    return { error: "Пароль уже задан. Войди обычным способом" };
-  }
+  if (user.passwordHash.length > 0) return { error: "alreadySet" };
 
   await db
     .update(users)

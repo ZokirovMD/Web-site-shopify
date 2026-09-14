@@ -1,0 +1,70 @@
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--edge) * 4) calc(var(--edge) * 2.5);
+}
+
+.card {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--edge) * 2);
+  padding: calc(var(--edge) * 5);
+  text-align: center;
+  background: var(--ground-raised);
+  border: 1px solid var(--line);
+  clip-path: polygon(
+    var(--chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0 100%,
+    0 var(--chamfer)
+  );
+}
+
+.title {
+  font-size: var(--text-heading);
+}
+
+.body {
+  font-size: var(--text-caption);
+  color: var(--ink-muted);
+  line-height: 1.55;
+  max-width: 36ch;
+}
+
+/* Та же кнопка, что на входе: цвет заливки, фаска, та же реакция на курсор. */
+.retry {
+  margin-top: calc(var(--edge) * 1);
+  display: inline-flex;
+  align-items: center;
+  height: calc(var(--edge) * 5.5);
+  padding-inline: calc(var(--edge) * 3);
+  background: var(--lapis-fill);
+  color: var(--ink-on-fill);
+  border: 0;
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  font-weight: 600;
+  text-decoration: none;
+  clip-path: polygon(
+    var(--chamfer-sm) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer-sm)),
+    calc(100% - var(--chamfer-sm)) 100%,
+    0 100%,
+    0 var(--chamfer-sm)
+  );
+  transition: filter var(--t-instant) var(--ease);
+}
+
+.retry:hover {
+  filter: brightness(1.12);
+}

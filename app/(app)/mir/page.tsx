@@ -1,19 +1,8 @@
 import { ModuleStub } from "@/components/shell/ModuleStub";
+import { moduleMetadata } from "@/lib/metadata";
 
-export const metadata = { title: "Мир · ORBIT" };
+export const generateMetadata = () => moduleMetadata("mir");
 
 export default function Page() {
-  return (
-    <ModuleStub
-      title="Мир"
-      phase="Ф8"
-      summary="Сохранялки как в Инстаграме, путешествия и личный новостник по Ташкенту, отфильтрованный под твои интересы вместе с исключениями."
-      points={[
-        "КОЛЛЕКЦИИ — места, фильмы, книги, идеи. Поделиться с телефона в один жест",
-        "ПУТЕШЕСТВИЯ — куда хочу, сколько стоит, когда лучше ехать",
-        "РАДАР — что открылось, кто приезжает, где хайкинг",
-        "ИНТЕРЕСЫ — профиль фильтра с исключениями: футбол не интересен, но звёзды да",
-      ]}
-    />
-  );
+  return <ModuleStub module="mir" />;
 }

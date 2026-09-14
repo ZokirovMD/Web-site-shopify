@@ -40,11 +40,3 @@ export async function verifyPassword(digest: string, plain: string): Promise<boo
     return false;
   }
 }
-
-/** Минимальные требования. Длина важнее состава символов. */
-export function passwordProblem(plain: string): string | null {
-  if (plain.length < 10) return "Пароль короче 10 символов";
-  if (plain.length > 200) return "Пароль длиннее 200 символов";
-  if (/^\d+$/.test(plain)) return "Пароль только из цифр подбирается за секунды";
-  return null;
-}

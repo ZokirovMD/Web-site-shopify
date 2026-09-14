@@ -1,20 +1,8 @@
 import { ModuleStub } from "@/components/shell/ModuleStub";
+import { moduleMetadata } from "@/lib/metadata";
 
-export const metadata = { title: "Настройки · ORBIT" };
+export const generateMetadata = () => moduleMetadata("nastrojki");
 
 export default function Page() {
-  return (
-    <ModuleStub
-      title="Настройки"
-      phase="Ф0"
-      summary="Валюта, курс, часовой пояс, подушка безопасности, тема и выгрузка всех данных. Ничего из этого не зашито в код — всё редактируется."
-      points={[
-        "Основная и отображаемая валюта, курс UZS/USD с датой",
-        "Подушка: остаток, ниже которого «можно потратить» не опускается",
-        "Часовой пояс и начало недели",
-        "СКАЧАТЬ ВСЁ — один JSON со всей базой плюс CSV по модулям",
-        "Тема: системная, светлая, тёмная",
-      ]}
-    />
-  );
+  return <ModuleStub module="nastrojki" />;
 }

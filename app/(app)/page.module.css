@@ -33,7 +33,7 @@
   font-family: var(--font-text);
   font-size: var(--text-caption);
   font-weight: 600;
-  color: var(--ink);
+  color: var(--ink-on-fill);
   background: var(--lapis-fill);
   border: 0;
   height: calc(var(--edge) * 5);

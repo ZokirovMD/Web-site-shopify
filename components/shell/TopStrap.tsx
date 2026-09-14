@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { NAV } from "./nav";
 import { OrbitMark } from "./OrbitMark";
 import { ThemeToggle } from "./ThemeToggle";
@@ -16,16 +17,17 @@ import styles from "./TopStrap.module.css";
  */
 export function TopStrap({ onOpenPalette }: { onOpenPalette: () => void }) {
   const pathname = usePathname();
+  const t = useTranslations();
 
   return (
     <header className={styles.strap}>
       <div className={styles.row}>
-        <Link href="/" className={styles.brand} aria-label="ORBIT, на главную">
+        <Link href="/" className={styles.brand} aria-label={t("shell.home")}>
           <OrbitMark size={26} />
-          <span className={styles.brandName}>ORBIT</span>
+          <span className={styles.brandName}>{t("brand.name")}</span>
         </Link>
 
-        <nav className={styles.nav} aria-label="Модули">
+        <nav className={styles.nav} aria-label={t("shell.modules")}>
           {NAV.map((item) => {
             const active =
               item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -39,7 +41,7 @@ export function TopStrap({ onOpenPalette }: { onOpenPalette: () => void }) {
                 aria-current={active ? "page" : undefined}
               >
                 <span className={styles.navNode} aria-hidden="true" />
-                {item.label}
+                {t(`modules.${item.key}.label`)}
               </Link>
             );
           })}
@@ -50,9 +52,9 @@ export function TopStrap({ onOpenPalette }: { onOpenPalette: () => void }) {
             type="button"
             className={styles.palette}
             onClick={onOpenPalette}
-            aria-label="Открыть поиск и быстрый ввод"
+            aria-label={t("shell.openPalette")}
           >
-            <span className={styles.paletteLabel}>Поиск</span>
+            <span className={styles.paletteLabel}>{t("common.search")}</span>
             <kbd className={styles.kbd}>⌘K</kbd>
           </button>
           <ThemeToggle />

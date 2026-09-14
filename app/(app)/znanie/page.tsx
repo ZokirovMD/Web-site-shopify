@@ -1,19 +1,8 @@
 import { ModuleStub } from "@/components/shell/ModuleStub";
+import { moduleMetadata } from "@/lib/metadata";
 
-export const metadata = { title: "Знание · ORBIT" };
+export const generateMetadata = () => moduleMetadata("znanie");
 
 export default function Page() {
-  return (
-    <ModuleStub
-      title="Знание"
-      phase="Ф7"
-      summary="Университет и собственное обучение в одном месте. Курс проходит путь: я предложил → ты принял → поставил в календарь → посмотрел → галочка закрывает везде."
-      points={[
-        "УНИВЕРСИТЕТ — семестры, курсы, домашки, оценки, средний балл",
-        "ОБУЧЕНИЕ — навыки, курсы, книги, ролики, менторы",
-        "Провайдер как категория: подписка Coursera живёт правилом в ДЕНЬГАХ",
-        "АРХИВ — весь список пройденного, собирается сам из завершённого",
-      ]}
-    />
-  );
+  return <ModuleStub module="znanie" />;
 }

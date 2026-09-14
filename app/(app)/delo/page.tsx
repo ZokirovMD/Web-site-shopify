@@ -1,19 +1,8 @@
 import { ModuleStub } from "@/components/shell/ModuleStub";
+import { moduleMetadata } from "@/lib/metadata";
 
-export const metadata = { title: "Дело · ORBIT" };
+export const generateMetadata = () => moduleMetadata("delo");
 
 export default function Page() {
-  return (
-    <ModuleStub
-      title="Дело"
-      phase="Ф6"
-      summary="Несколько бизнесов с метриками и графиками, и воронка идей с жёсткой оценкой. Смета идеи встречается с движком проекций и отвечает, когда ты соберёшь нужную сумму."
-      points={[
-        "БИЗНЕСЫ — шесть вкладок: обзор, метрики, темы, задачи, деньги, люди",
-        "ИДЕИ — воронка от сырой до запущенной, ничего не теряется",
-        "ОЦЕНКА — семь критериев от 1 до 5 плюс стоп-флаг. Идеи сравнимы",
-        "СМЕТА — этапы со стоимостью, итог уходит в цель накопления",
-      ]}
-    />
-  );
+  return <ModuleStub module="delo" />;
 }

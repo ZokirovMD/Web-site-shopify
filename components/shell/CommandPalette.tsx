@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { NAV } from "./nav";
 import styles from "./CommandPalette.module.css";
 
@@ -29,6 +30,7 @@ export function CommandPalette({
   onClose: () => void;
 }) {
   const router = useRouter();
+  const t = useTranslations();
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,12 +40,12 @@ export function CommandPalette({
     () =>
       NAV.map((item) => ({
         id: item.href,
-        label: item.label,
-        hint: item.summary,
-        group: "Разделы",
+        label: t(`modules.${item.key}.label`),
+        hint: t(`modules.${item.key}.hint`),
+        group: t("palette.sections"),
         run: () => router.push(item.href),
       })),
-    [router],
+    [router, t],
   );
 
   const results = useMemo(() => {
@@ -105,7 +107,7 @@ export function CommandPalette({
         onKeyDown={onKeyDown}
         role="dialog"
         aria-modal="true"
-        aria-label="Поиск по ORBIT"
+        aria-label={t("palette.title")}
       >
         <input
           ref={inputRef}
@@ -113,14 +115,14 @@ export function CommandPalette({
           className={styles.input}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Куда перейти"
+          placeholder={t("palette.placeholder")}
           autoComplete="off"
           spellCheck={false}
         />
 
         <div className={styles.list} ref={listRef}>
           {results.length === 0 ? (
-            <p className={styles.nothing}>Ничего не нашлось по запросу «{query}»</p>
+            <p className={styles.nothing}>{t("palette.nothing", { query })}</p>
           ) : (
             results.map((command, index) => (
               <button
@@ -146,13 +148,13 @@ export function CommandPalette({
         <div className={styles.footer}>
           <span>
             <kbd>↑</kbd>
-            <kbd>↓</kbd> выбрать
+            <kbd>↓</kbd> {t("palette.pick")}
           </span>
           <span>
-            <kbd>↵</kbd> перейти
+            <kbd>↵</kbd> {t("palette.go")}
           </span>
           <span>
-            <kbd>esc</kbd> закрыть
+            <kbd>esc</kbd> {t("palette.close")}
           </span>
         </div>
       </div>

@@ -11,13 +11,27 @@ import { SESSION_COOKIE } from "@/lib/auth/constants";
  * ни argon2. Попытка проверить сессию здесь закончилась бы либо тяжёлым
  * запросом на каждый файл, либо самодельной криптографией в токене.
  */
-export function middleware(request: NextRequest) {
-  const hasCookie = request.cookies.has(SESSION_COOKIE);
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/vhod");
 
-  if (!hasCookie && !isAuthRoute) {
-    const url = new URL("/vhod", request.url);
-    return NextResponse.redirect(url);
+/**
+ * Открыто без сессии. Экран входа — очевидно; остальное — обвязка PWA:
+ * service worker, которому редирект на /vhod ломает регистрацию, и страница
+ * обрыва связи, которую он держит у себя. Личных данных там нет.
+ */
+const PUBLIC_PATHS = ["/vhod", "/offline", "/sw.js"];
+
+function isPublic(pathname: string): boolean {
+  return PUBLIC_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const hasCookie = request.cookies.has(SESSION_COOKIE);
+  const isAuthRoute = pathname.startsWith("/vhod");
+
+  if (!hasCookie && !isPublic(pathname)) {
+    return NextResponse.redirect(new URL("/vhod", request.url));
   }
 
   if (hasCookie && isAuthRoute) {
@@ -28,5 +42,12 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.png$).*)"],
+  /**
+   * Статика мимо: сборочные файлы, изображения, иконки и манифест. Иначе
+   * приложение, установленное на домашний экран, не получит ни значка,
+   * ни манифеста, пока не войдёшь.
+   */
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|svg|ico|webmanifest)$).*)",
+  ],
 };

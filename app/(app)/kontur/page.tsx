@@ -1,19 +1,8 @@
 import { ModuleStub } from "@/components/shell/ModuleStub";
+import { moduleMetadata } from "@/lib/metadata";
 
-export const metadata = { title: "Контур · ORBIT" };
+export const generateMetadata = () => moduleMetadata("kontur");
 
 export default function Page() {
-  return (
-    <ModuleStub
-      title="Контур"
-      phase="Ф2"
-      summary="Здесь мы с тобой разговариваем — внутри ORBIT, а не в отдельном чате. Ты пишешь вопрос или просьбу, я прихожу раз в час или сразу, отвечаю тут же и вношу правки."
-      points={[
-        "ДИАЛОГ — треды с вопросами и моими ответами, привязанные к модулю",
-        "ПРЕДЛОЖЕНИЯ — что я советую: курсы, книги, привычки, идеи. Принять или отклонить",
-        "ЖУРНАЛ — что я сделал сам, когда и что изменил, с возможностью откатить",
-        "Ответ приходит в течение часа: это асинхронная очередь, а не живой чат",
-      ]}
-    />
-  );
+  return <ModuleStub module="kontur" />;
 }

@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useFormatter, useTimeZone, useTranslations } from "next-intl";
 import { Bar, Label, Mark, Node, Numeral, Tile } from "@/design/primitives";
-import { addDays, today } from "@/core/date";
+import { addDays, todayIn, type CalendarDate } from "@/core/date";
 import { format, subtract } from "@/core/money";
+import { TIME_ZONE } from "@/i18n/config";
 import {
   balanceOn,
   burnRate,
@@ -12,7 +14,6 @@ import {
   project,
   safeToSpend,
 } from "@/core/projection";
-import ru from "@/i18n/ru.json";
 import {
   DEMO_ACCOUNTS,
   DEMO_BUFFER,
@@ -35,13 +36,22 @@ const URGENCY_ROLE = {
 
 export function PulseBoard() {
   const [days, setDays] = useState(31);
+  const t = useTranslations("pulse");
+  const tc = useTranslations("common");
+  const formatter = useFormatter();
+  // Пояс задан в i18n/request.ts, но тип допускает его отсутствие —
+  // подстраховываемся той же константой, а не поясом машины.
+  const timeZone = useTimeZone() ?? TIME_ZONE;
 
   /**
    * Настоящий движок проекций из core/projection — тот же, что обслуживает
    * цели и сметы бизнеса. Экран ничего не считает сам.
+   *
+   * Пояс задан явно: сервер в UTC и браузер в Ташкенте иначе взяли бы разные
+   * «сегодня», и вся проекция разъехалась бы на день.
    */
   const { series, start } = useMemo(() => {
-    const from = today();
+    const from = todayIn(timeZone);
     return {
       start: from,
       series: project({
@@ -54,7 +64,7 @@ export function PulseBoard() {
         currency: CURRENCY,
       }),
     };
-  }, []);
+  }, [timeZone]);
 
   const balanceNow = series[0]?.closing ?? null;
   const targetDate = addDays(start, days);
@@ -67,20 +77,9 @@ export function PulseBoard() {
   const goalFunded = fundedOn(series, goalRemaining, DEMO_BUFFER);
   const goalPct = Math.round((DEMO_GOAL.saved.amount / DEMO_GOAL.target.amount) * 100);
 
-  const humanDate = (iso: string) =>
-    new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" }).format(
-      new Date(`${iso}T12:00:00Z`),
-    );
-
-  const todayLong = useMemo(
-    () =>
-      new Intl.DateTimeFormat("ru-RU", {
-        day: "numeric",
-        month: "long",
-        weekday: "long",
-      }).format(new Date()),
-    [],
-  );
+  /** Полдень UTC: любой сдвиг пояса остаётся внутри тех же суток. */
+  const atNoon = (date: CalendarDate) => new Date(`${date}T12:00:00Z`);
+  const humanDate = (date: CalendarDate) => formatter.dateTime(atNoon(date), "day");
 
   return (
     <div className={styles.page}>
@@ -88,26 +87,28 @@ export function PulseBoard() {
           Здесь только то, что принадлежит самому ПУЛЬСУ. */}
       <header className={styles.pageHead}>
         <div>
-          <p className="o-label">{ru.pulse.title}</p>
-          <span className={styles.date}>{todayLong}</span>
+          <p className="o-label">{t("title")}</p>
+          <span className={styles.date}>
+            {formatter.dateTime(atNoon(start), "weekday")}
+          </span>
         </div>
         <button type="button" className={styles.quickEntry}>
-          {ru.common.add}
+          {tc("add")}
         </button>
       </header>
 
       <section className={styles.moneyLine}>
         <div className={styles.moneyPrimary}>
-          <Label>{ru.pulse.balanceNow}</Label>
+          <Label>{t("balanceNow")}</Label>
           <span className={styles.balance}>
-            {balanceNow ? format(balanceNow, { currency: false }) : "—"}
+            {balanceNow ? format(balanceNow, { currency: false }) : t("noValue")}
             <span className="o-numeral__currency">{CURRENCY}</span>
           </span>
         </div>
 
         <div className={styles.moneySecondary}>
           <div className={styles.cell}>
-            <Label>{`${ru.pulse.balanceProjected} · ${humanDate(targetDate)}`}</Label>
+            <Label>{t("balanceProjectedOn", { date: humanDate(targetDate) })}</Label>
             {/* Это остаток на дату, а не прирост — поэтому без знака «плюс».
                 Направление читается цветом И подписью, никогда одним цветом. */}
             <span
@@ -115,22 +116,22 @@ export function PulseBoard() {
                 projected && projected.amount < 0 ? styles.out : styles.in
               }`}
             >
-              {projected ? format(projected, { currency: false }) : "—"}
+              {projected ? format(projected, { currency: false }) : t("noValue")}
             </span>
           </div>
           <div className={styles.cell}>
-            <Label>{ru.pulse.burnDaily}</Label>
+            <Label>{t("burnDaily")}</Label>
             <span className={styles.cellValue}>{format(burn, { currency: false })}</span>
           </div>
           <div className={styles.cell}>
-            <Label>{ru.pulse.safeToSpend}</Label>
+            <Label>{t("safeToSpend")}</Label>
             <span className={`${styles.cellValue} ${styles.in}`}>
               {format(safe, { currency: false })}
             </span>
           </div>
           {shortfall ? (
             <div className={styles.cell}>
-              <Label>{ru.pulse.shortfall}</Label>
+              <Label>{t("shortfall")}</Label>
               <span className={`${styles.cellValue} ${styles.out}`}>
                 {humanDate(shortfall)}
               </span>
@@ -140,20 +141,20 @@ export function PulseBoard() {
       </section>
 
       <ProjectionScrubber
-        label={ru.pulse.scrubber}
-        hint={ru.pulse.scrubberHint}
-        todayLabel={ru.pulse.today}
+        label={t("scrubber")}
+        hint={t("scrubberHint")}
+        todayLabel={t("today")}
         maxDays={HORIZON_DAYS}
         defaultDays={31}
         onChange={setDays}
-        formatDay={(value) => ru.pulse.plusDays.replace("{days}", String(value))}
+        formatDay={(value) => t("plusDays", { days: value })}
       />
 
       <section className={styles.tiles}>
         <Tile>
           <div className={styles.tileHead}>
             <Node role="ochre" />
-            <span className={styles.tileTitle}>{ru.pulse.obligations.toUpperCase()}</span>
+            <span className={styles.tileTitle}>{t("obligations").toUpperCase()}</span>
           </div>
           <div className={styles.rows}>
             {DEMO_OBLIGATIONS.map((item) => (
@@ -169,14 +170,14 @@ export function PulseBoard() {
         <Tile>
           <div className={styles.tileHead}>
             <Node role="turquoise" />
-            <span className={styles.tileTitle}>{ru.pulse.habits.toUpperCase()}</span>
+            <span className={styles.tileTitle}>{t("habits").toUpperCase()}</span>
           </div>
           <div className={styles.rows}>
             {DEMO_HABITS.map((item) => (
               <div key={item.title} className={styles.row}>
                 <Node role={item.done ? "turquoise" : "faint"} filled={item.done} />
                 <span>{item.title}</span>
-                <span className={styles.rowMeta}>{item.streak} дн</span>
+                <span className={styles.rowMeta}>{t("streak", { days: item.streak })}</span>
               </div>
             ))}
           </div>
@@ -185,13 +186,13 @@ export function PulseBoard() {
         <Tile>
           <div className={styles.tileHead}>
             <Node role="lapis" />
-            <span className={styles.tileTitle}>{ru.pulse.goals.toUpperCase()}</span>
+            <span className={styles.tileTitle}>{t("goals").toUpperCase()}</span>
           </div>
           <div className={styles.goalRow}>
             <div className={styles.goalHead}>
               <span>{DEMO_GOAL.title}</span>
               <span className={styles.goalWhen}>
-                {goalFunded ? humanDate(goalFunded) : ru.pulse.notOnHorizon}
+                {goalFunded ? humanDate(goalFunded) : t("notOnHorizon")}
               </span>
             </div>
             <Bar
@@ -206,7 +207,10 @@ export function PulseBoard() {
                 showCurrency={false}
               />
               <span className={styles.rowMeta}>
-                {goalPct}% из {format(DEMO_GOAL.target, { currency: false })}
+                {t("goalProgress", {
+                  percent: goalPct,
+                  target: format(DEMO_GOAL.target, { currency: false }),
+                })}
               </span>
             </div>
           </div>
@@ -215,7 +219,7 @@ export function PulseBoard() {
 
       <p className={styles.synthetic}>
         <Node role="faint" />
-        {ru.common.synthetic} — настоящих счетов в системе ещё нет
+        {tc("syntheticNote")}
       </p>
     </div>
   );

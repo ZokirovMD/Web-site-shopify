@@ -1,17 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { polygon, toPath } from "@/design/girih";
 import styles from "./ThemeToggle.module.css";
 
 type Theme = "system" | "light" | "dark";
 
 const ORDER: readonly Theme[] = ["system", "light", "dark"];
-const LABEL: Record<Theme, string> = {
-  system: "Тема: как в системе",
-  light: "Тема: светлая",
-  dark: "Тема: тёмная",
-};
 const FILL: Record<Theme, string> = {
   system: "none",
   light: "var(--ochre)",
@@ -28,6 +24,8 @@ const FILL: Record<Theme, string> = {
  */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>("system");
+  const t = useTranslations("shell.theme");
+  const label = `${t("toggle")}: ${t(theme)}`;
 
   useEffect(() => {
     const saved = readTheme();
@@ -54,8 +52,8 @@ export function ThemeToggle() {
       type="button"
       className={styles.toggle}
       onClick={cycle}
-      aria-label={LABEL[theme]}
-      title={LABEL[theme]}
+      aria-label={label}
+      title={label}
     >
       <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
         <path d={decagon} fill={FILL[theme]} stroke="var(--line-strong)" strokeWidth="1" />

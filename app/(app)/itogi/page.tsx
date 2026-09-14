@@ -1,19 +1,8 @@
 import { ModuleStub } from "@/components/shell/ModuleStub";
+import { moduleMetadata } from "@/lib/metadata";
 
-export const metadata = { title: "Итоги · ORBIT" };
+export const generateMetadata = () => moduleMetadata("itogi");
 
 export default function Page() {
-  return (
-    <ModuleStub
-      title="Итоги"
-      phase="Ф9"
-      summary="Раз в неделю и раз в месяц система сама показывает, что случилось: что сошлось, что нет, куда ушли деньги и время. Это то, что отличает работающую систему от кладбища данных."
-      points={[
-        "Недельный разбор: план против факта по всем модулям",
-        "Месячный: динамика денег, тренировок, учёбы и привычек",
-        "Три вопроса, на которые ты отвечаешь сам",
-        "Сравнение с предыдущим периодом",
-      ]}
-    />
-  );
+  return <ModuleStub module="itogi" />;
 }

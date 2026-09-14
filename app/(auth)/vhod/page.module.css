@@ -72,7 +72,7 @@
   margin-top: calc(var(--edge) * 1);
   background: var(--lapis-fill);
   border: 0;
-  color: var(--ink);
+  color: var(--ink-on-fill);
   font-family: var(--font-text);
   font-size: var(--text-body);
   font-weight: 600;

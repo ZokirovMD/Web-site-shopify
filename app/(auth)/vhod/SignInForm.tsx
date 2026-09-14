@@ -1,8 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { GirihEmpty } from "@/design/GirihEmpty";
 import { setFirstPassword, signIn, type FormState } from "@/lib/auth/actions";
+import { PASSWORD_MAX, PASSWORD_MIN } from "@/lib/auth/rules";
 import styles from "./page.module.css";
 
 const EMPTY: FormState = {};
@@ -10,6 +12,14 @@ const EMPTY: FormState = {};
 export function SignInForm({ first }: { first: boolean }) {
   const action = first ? setFirstPassword : signIn;
   const [state, submit, pending] = useActionState(action, EMPTY);
+  const t = useTranslations("auth");
+  /**
+   * Действие возвращает ключ, а фразу подставляем здесь. Лишние значения ICU
+   * игнорирует, поэтому min и max можно передавать всегда.
+   */
+  const problem = state.error
+    ? t(`errors.${state.error}`, { min: PASSWORD_MIN, max: PASSWORD_MAX })
+    : null;
 
   return (
     <form className={styles.card} action={submit}>
@@ -17,18 +27,13 @@ export function SignInForm({ first }: { first: boolean }) {
         <GirihEmpty size={120} />
       </div>
 
-      <p className="o-label">{first ? "Первый вход" : "ORBIT"}</p>
-      <h1 className={styles.title}>{first ? "Задай пароль" : "Вход"}</h1>
+      <p className="o-label">{first ? t("firstEyebrow") : t("eyebrow")}</p>
+      <h1 className={styles.title}>{first ? t("firstTitle") : t("title")}</h1>
 
-      {first ? (
-        <p className={styles.hint}>
-          Пароль ты задаёшь сам, здесь и сейчас. Я его не знаю и знать не должен:
-          так он не проходит ни через чат, ни через переписку.
-        </p>
-      ) : null}
+      {first ? <p className={styles.hint}>{t("firstHint")}</p> : null}
 
       <label className={styles.field}>
-        <span className="o-label">Почта</span>
+        <span className="o-label">{t("email")}</span>
         <input
           id="email"
           name="email"
@@ -40,7 +45,7 @@ export function SignInForm({ first }: { first: boolean }) {
       </label>
 
       <label className={styles.field}>
-        <span className="o-label">Пароль</span>
+        <span className="o-label">{t("password")}</span>
         <input
           id="password"
           name="password"
@@ -53,7 +58,7 @@ export function SignInForm({ first }: { first: boolean }) {
 
       {first ? (
         <label className={styles.field}>
-          <span className="o-label">Ещё раз</span>
+          <span className="o-label">{t("repeat")}</span>
           <input
             id="repeat"
             name="repeat"
@@ -65,19 +70,17 @@ export function SignInForm({ first }: { first: boolean }) {
         </label>
       ) : null}
 
-      {state.error ? (
+      {problem ? (
         <p className={styles.error} role="alert">
-          {state.error}
+          {problem}
         </p>
       ) : null}
 
       <button type="submit" className={styles.submit} disabled={pending}>
-        {pending ? "Проверяю" : first ? "Задать пароль и войти" : "Войти"}
+        {pending ? t("pending") : first ? t("firstSubmit") : t("signIn")}
       </button>
 
-      {first ? (
-        <p className={styles.foot}>Минимум 10 символов. Длина важнее спецсимволов.</p>
-      ) : null}
+      {first ? <p className={styles.foot}>{t("rule", { min: PASSWORD_MIN })}</p> : null}
     </form>
   );
 }

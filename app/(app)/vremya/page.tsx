@@ -1,19 +1,8 @@
 import { ModuleStub } from "@/components/shell/ModuleStub";
+import { moduleMetadata } from "@/lib/metadata";
 
-export const metadata = { title: "Время · ORBIT" };
+export const generateMetadata = () => moduleMetadata("vremya");
 
 export default function Page() {
-  return (
-    <ModuleStub
-      title="Время"
-      phase="Ф5"
-      summary="Календарь, который можно двигать мышью, задачи и общая лента дедлайнов из всех модулей сразу. События размечаются теми же контекстами, что и траты."
-      points={[
-        "КАЛЕНДАРЬ — перетаскивание, описание, смена даты",
-        "ЗАДАЧИ — то, что не домашка и не событие, но забывать нельзя",
-        "ЛЕНТА ДЕДЛАЙНОВ — из учёбы, дела, тренировок и целей в одном месте",
-        "ИМПОРТ РАСПИСАНИЯ ВУЗА — раз в неделю, автоматически",
-      ]}
-    />
-  );
+  return <ModuleStub module="vremya" />;
 }

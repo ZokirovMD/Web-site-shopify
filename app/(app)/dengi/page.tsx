@@ -1,20 +1,8 @@
 import { ModuleStub } from "@/components/shell/ModuleStub";
+import { moduleMetadata } from "@/lib/metadata";
 
-export const metadata = { title: "Деньги · ORBIT" };
+export const generateMetadata = () => moduleMetadata("dengi");
 
 export default function Page() {
-  return (
-    <ModuleStub
-      title="Деньги"
-      phase="Ф1"
-      summary="Счета, операции и правила, из которых движок проекций считает будущее. Каждая трата размечается четырьмя измерениями: что, с кем, зачем и где."
-      points={[
-        "СЧЕТА И ОПЕРАЦИИ — быстрый ввод с разметкой по четырём измерениям",
-        "ПРАВИЛА — «50 000 в день», «стипендия 5-го». Разворачиваются в проекцию",
-        "БЮДЖЕТЫ — лимит на месяц и дата, когда он кончится при текущем темпе",
-        "АНАЛИТИКА — сколько ушло на еду с друзьями, сколько потрачено импульсивно",
-        "ЦЕЛИ — цена, собрано, дата закрытия при текущем темпе",
-      ]}
-    />
-  );
+  return <ModuleStub module="dengi" />;
 }

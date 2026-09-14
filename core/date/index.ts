@@ -43,6 +43,33 @@ export function today(now: Date = new Date()): CalendarDate {
   return `${y}-${m}-${d}` as CalendarDate;
 }
 
+/**
+ * Сегодня В ЗАДАННОМ ПОЯСЕ, а не в поясе машины.
+ *
+ * Это не придирка. Сервер на Vercel живёт в UTC, владелец — в Ташкенте,
+ * UTC+5. С полуночи до пяти утра по Ташкенту `today()` на сервере вернёт
+ * вчерашний день, а в браузере — сегодняшний: проекция посчитается от разных
+ * дат, и React сверх того сообщит о рассинхроне разметки.
+ *
+ * Пояс приходит снаружи (сейчас из настроек next-intl, позже — из таблицы
+ * settings): модуль остаётся чистым и ничего не знает об источнике.
+ */
+export function todayIn(timeZone: string, now: Date = new Date()): CalendarDate {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+
+  const part = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((item) => item.type === type)?.value ?? "";
+
+  return calendarDate(
+    `${part("year").padStart(4, "0")}-${part("month")}-${part("day")}`,
+  );
+}
+
 export function addDays(date: CalendarDate, days: number): CalendarDate {
   const d = toUtc(date);
   d.setUTCDate(d.getUTCDate() + days);

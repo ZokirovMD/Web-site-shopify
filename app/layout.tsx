@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Golos_Text, Martian_Mono, Unbounded } from "next/font/google";
-import ru from "@/i18n/ru.json";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { ServiceWorker } from "@/components/shell/ServiceWorker";
 import "./globals.css";
 
 /**
@@ -29,12 +31,26 @@ const martian = Martian_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: ru.brand.name,
-  description: ru.brand.tagline,
-  applicationName: ru.brand.name,
-  appleWebApp: { capable: true, title: ru.brand.name, statusBarStyle: "black-translucent" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("brand");
+  const name = t("name");
+
+  return {
+    title: name,
+    description: t("tagline"),
+    applicationName: name,
+    manifest: "/manifest.webmanifest",
+    appleWebApp: { capable: true, title: name, statusBarStyle: "black-translucent" },
+    icons: {
+      icon: [
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -46,10 +62,24 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  /**
+   * Сообщения уходят в провайдер целиком: словарь у нас маленький, а разбор
+   * по namespace на каждый компонент даёт больше швов, чем экономии.
+   */
+  const [locale, messages] = await Promise.all([getLocale(), getMessages()]);
+
   return (
-    <html lang="ru" className={`${unbounded.variable} ${golos.variable} ${martian.variable}`}>
-      <body>{children}</body>
+    <html
+      lang={locale}
+      className={`${unbounded.variable} ${golos.variable} ${martian.variable}`}
+    >
+      <body>
+        <NextIntlClientProvider messages={messages}>
+          {children}
+          <ServiceWorker />
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }
