@@ -35,3 +35,6 @@ dist/
 
 # артефакты TypeScript
 *.tsbuildinfo
+
+# служебные скрипты запускаются через node --experimental-strip-types
+# и не участвуют в сборке приложения (см. tsconfig exclude)
