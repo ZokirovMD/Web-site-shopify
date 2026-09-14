@@ -1,0 +1,75 @@
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-inline: calc(var(--edge) * 2.5);
+  padding-block: calc(var(--edge) * 7) calc(var(--edge) * 12);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(var(--edge) * 3);
+}
+
+.title {
+  font-size: clamp(33px, 6vw, 53px);
+  margin-top: calc(var(--edge) * 1);
+}
+
+.summary {
+  margin-top: calc(var(--edge) * 3);
+  max-width: 62ch;
+  font-size: var(--text-subtitle);
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.tile {
+  margin-top: calc(var(--edge) * 5);
+  max-width: 62ch;
+}
+
+/* Маркер — ромб гириха, а не дефолтная точка списка. */
+.list {
+  margin: calc(var(--edge) * 2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--edge) * 1.25);
+  color: var(--ink-muted);
+  line-height: 1.55;
+  font-size: var(--text-caption);
+}
+
+.list li {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--edge) * 1.5);
+}
+
+.list li::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin-top: 7px;
+  background: var(--lapis);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+.note {
+  margin-top: calc(var(--edge) * 4);
+  font-size: var(--text-caption);
+  color: var(--ink-faint);
+  max-width: 62ch;
+}
+
+@media (max-width: 640px) {
+  .head > :last-child {
+    display: none;
+  }
+}

@@ -1,0 +1,23 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--edge) * 4);
+  height: calc(var(--edge) * 4);
+  background: var(--ground-sunken);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  clip-path: polygon(
+    var(--chamfer-sm) 0,
+    100% 0,
+    100% calc(100% - var(--chamfer-sm)),
+    calc(100% - var(--chamfer-sm)) 100%,
+    0 100%,
+    0 var(--chamfer-sm)
+  );
+  transition: border-color var(--t-instant) var(--ease);
+}
+
+.toggle:hover {
+  border-color: var(--line-strong);
+}

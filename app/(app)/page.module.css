@@ -9,34 +9,24 @@
   padding-block: 0 calc(var(--edge) * 12);
 }
 
-/* ---- Верхняя тесьма: знак слева, дата и скраббер по центру, ввод справа ---- */
-.topStrap {
+/* ---- Шапка страницы. Знак и навигация — в оболочке, не здесь. ---- */
+.pageHead {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: calc(var(--edge) * 2);
   flex-wrap: wrap;
-  padding-block: calc(var(--edge) * 3);
+  padding-block: calc(var(--edge) * 4) calc(var(--edge) * 2.5);
   border-bottom: 1px solid var(--line);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: calc(var(--edge) * 1.5);
-}
-
-.brandName {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-caption);
-  letter-spacing: 0.2em;
-}
-
 .date {
-  font-family: var(--font-mono);
-  font-size: var(--text-label);
-  color: var(--ink-faint);
-  margin-left: auto;
+  display: block;
+  margin-top: calc(var(--edge) * 0.75);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-subtitle);
+  color: var(--ink);
 }
 
 .quickEntry {
